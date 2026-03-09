@@ -195,6 +195,7 @@ export default function App() {
   const [fiftyCount, setFiftyCount] = useState(0);
   const [message, setMessage] = useState("");
   const [messageStatus, setMessageStatus] = useState("success");
+  const [isCorrect, setIsCorrect] = useState(false);
   const target = question.target;
   const voiceRef = useRef(null);
 
@@ -246,21 +247,25 @@ export default function App() {
   const addTen = () => {
     setTenCount((n) => n + 1);
     clearMessage();
+    setIsCorrect(false);
   };
 
   const addFifty = () => {
     setFiftyCount((n) => n + 1);
     clearMessage();
+    setIsCorrect(false);
   };
 
   const removeTen = () => {
     setTenCount((n) => Math.max(0, n - 1));
     clearMessage();
+    setIsCorrect(false);
   };
 
   const removeFifty = () => {
     setFiftyCount((n) => Math.max(0, n - 1));
     clearMessage();
+    setIsCorrect(false);
   };
 
   const reset = () => {
@@ -268,6 +273,7 @@ export default function App() {
     setFiftyCount(0);
     setMessageStatus("info");
     setMessage("もういちど！");
+    setIsCorrect(false);
   };
 
   const nextQuestion = () => {
@@ -278,6 +284,7 @@ export default function App() {
     setTenCount(0);
     setFiftyCount(0);
     setMessage("");
+    setIsCorrect(false);
   };
 
   const checkAnswer = () => {
@@ -285,7 +292,7 @@ export default function App() {
       setMessageStatus("success");
       setMessage("せいかい！ すごい！");
       speak("せいかい。すごいね。");
-      window.setTimeout(nextQuestion, 1200);
+      setIsCorrect(true);
       return;
     }
 
@@ -293,12 +300,14 @@ export default function App() {
       setMessageStatus("warning");
       setMessage("あと もうすこし！");
       speak("あと、もうすこし。");
+      setIsCorrect(false);
       return;
     }
 
     setMessageStatus("info");
     setMessage("おおいよ。へらしてみよう");
     speak("おおいよ。へらしてみよう。");
+    setIsCorrect(false);
   };
 
   return (
@@ -317,21 +326,21 @@ export default function App() {
           <Box bg={panelBg} borderWidth="2px" borderColor="brand.200" rounded="2xl" p={{ base: 4, md: 5 }}>
             <Flex direction={{ base: "column", md: "row" }} gap={3} align={{ md: "center" }}>
               <Text fontSize={{ base: "2xl", md: "4xl" }} fontWeight="800">
-                おだい: <Text as="span">{target}</Text> えん を つくろう！
+                <Text as="span">{target}</Text> えん を つくろう！
               </Text>
             </Flex>
 
             <Grid mt={4} gap={3} templateColumns={{ base: "1fr 1fr", md: "repeat(4, 1fr)" }}>
-              <Button onClick={addTen} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="solid" _active={{ transform: "scale(0.98)" }}>
+              <Button onClick={addTen} isDisabled={isCorrect} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="solid" _active={{ transform: "scale(0.98)" }}>
                 +10 えん
               </Button>
-              <Button onClick={addFifty} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="solid" _active={{ transform: "scale(0.98)" }}>
+              <Button onClick={addFifty} isDisabled={isCorrect} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="solid" _active={{ transform: "scale(0.98)" }}>
                 +50 えん
               </Button>
-              <Button onClick={removeTen} isDisabled={tenCount === 0} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="outline" _active={{ transform: "scale(0.98)" }}>
+              <Button onClick={removeTen} isDisabled={isCorrect || tenCount === 0} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="outline" _active={{ transform: "scale(0.98)" }}>
                 -10 えん
               </Button>
-              <Button onClick={removeFifty} isDisabled={fiftyCount === 0} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="outline" _active={{ transform: "scale(0.98)" }}>
+              <Button onClick={removeFifty} isDisabled={isCorrect || fiftyCount === 0} size="lg" h="64px" fontSize={{ base: "2xl", md: "2xl" }} colorScheme="brand" variant="outline" _active={{ transform: "scale(0.98)" }}>
                 -50 えん
               </Button>
             </Grid>
@@ -384,10 +393,10 @@ export default function App() {
             </Flex>
 
             <Grid mt={4} pt={2} gap={3} templateColumns={{ base: "1fr", md: "1fr 1fr" }}>
-              <Button onClick={checkAnswer} colorScheme="brand" size="lg" h="64px" fontSize="2xl">
-                こたえあわせ
+              <Button onClick={isCorrect ? nextQuestion : checkAnswer} colorScheme="brand" size="lg" h="64px" fontSize="2xl">
+                {isCorrect ? "つぎのもんだい" : "こたえあわせ"}
               </Button>
-              <Button onClick={reset} colorScheme="brand" variant="outline" size="lg" h="64px" fontSize="2xl">
+              <Button onClick={reset} isDisabled={isCorrect} colorScheme="brand" variant="outline" size="lg" h="64px" fontSize="2xl">
                 やりなおし
               </Button>
             </Grid>
